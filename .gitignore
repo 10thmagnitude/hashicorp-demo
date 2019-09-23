@@ -4,3 +4,18 @@
 NotesForInstallingNomadConsulVaultInAWS.txt
 vagrant.pem
 data
+
+#  Local .terraform directories
+**/.terraform/*
+
+# .tfstate files
+*/**.tfstate
+*/**.tfstate.*
+
+# .tfvars files
+*/**backend.tfvars
+*/**backend.tfvars*
+*/**secrets.tfvars
+*/**secrets.tfvars*
+
+**/.vs/*

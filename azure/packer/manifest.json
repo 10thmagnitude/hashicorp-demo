@@ -1,0 +1,23 @@
+{
+  "builds": [
+    {
+      "name": "azure-arm",
+      "builder_type": "azure-arm",
+      "build_time": 1568991692,
+      "files": null,
+      "artifact_id": "/subscriptions/aff2c340-2ecc-404c-8fc1-d86773973e78/resourceGroups/plaz-witcher-dev-rg/providers/Microsoft.Compute/images/MyUbuntuImage",
+      "packer_run_uuid": "b457f14f-b6b2-5f63-78a2-eb7bf3495e8d",
+      "custom_data": null
+    },
+    {
+      "name": "azure-arm",
+      "builder_type": "azure-arm",
+      "build_time": 1569000709,
+      "files": null,
+      "artifact_id": "/subscriptions/aff2c340-2ecc-404c-8fc1-d86773973e78/resourceGroups/plaz-witcher-dev-rg/providers/Microsoft.Compute/images/MyUbuntuImage",
+      "packer_run_uuid": "e7a6abb0-b289-e4b2-d17e-9fc51478ce05",
+      "custom_data": null
+    }
+  ],
+  "last_run_uuid": "e7a6abb0-b289-e4b2-d17e-9fc51478ce05"
+}
