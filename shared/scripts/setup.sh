@@ -24,6 +24,7 @@ NOMADDIR=/opt/nomad
 # Dependencies
 sudo apt-get install -y software-properties-common
 sudo apt-get update
+sudo apt-get install -y unzip redis-tools jq
 sudo apt-get install -y unzip tree redis-tools jq
 sudo apt-get install -y upstart-sysv
 sudo update-initramfs -u
@@ -78,5 +79,6 @@ echo deb https://apt.dockerproject.org/repo ubuntu-`lsb_release -c | awk '{print
 sudo apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
 sudo apt-get update
 sudo apt-get install -y docker-engine
-sudo usermod -a -G docker ubuntu
+#sudo usermod -a -G docker ubuntu
 sudo sysctl -w vm.max_map_count=262144
+echo "Final Line of Code"
