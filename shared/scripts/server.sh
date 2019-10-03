@@ -13,7 +13,7 @@ HOME_DIR=ubuntu
 sleep 15
 
 IP_ADDRESS=$(curl http://instance-data/latest/meta-data/local-ipv4)
-DOCKER_BRIDGE_IP_ADDRESS=(`ifconfig docker0 2>/dev/null|awk '/inet addr:/ {print $2}'|sed 's/addr://'`)
+DOCKER_BRIDGE_IP_ADDRESS=($(ifconfig docker0 2>/dev/null | awk '/inet addr:/ {print $2}' | sed 's/addr://'))
 SERVER_COUNT=$1
 REGION=$2
 CLUSTER_TAG_VALUE=$3
@@ -32,11 +32,14 @@ export CONSUL_HTTP_ADDR=$IP_ADDRESS:8500
 export CONSUL_RPC_ADDR=$IP_ADDRESS:8400
 
 # Vault
+sudo useradd --system --home /etc/vault.d --shell /bin/false vault
 sed -i "s/IP_ADDRESS/$IP_ADDRESS/g" $CONFIGDIR/vault.hcl
 sudo cp $CONFIGDIR/vault.hcl $VAULTCONFIGDIR
-sudo cp $CONFIGDIR/vault_upstart.conf /etc/init/vault.conf
+sudo cp $CONFIGDIR/vault.service /etc/systemd/system/vault.conf
 
-sudo service vault start
+sudo systemctl enable vault
+sudo systemctl start vault
+sudo systemctl status vault
 
 # Nomad
 sed -i "s/IP_ADDRESS/$IP_ADDRESS/g" $CONFIGDIR/nomad.hcl
@@ -69,7 +72,7 @@ echo "export NOMAD_ADDR=http://$IP_ADDRESS:4646" | sudo tee --append /home/$HOME
 # and daemon.json to /etc/docker
 sudo mv /home/ubuntu/weave /usr/bin/weave
 sudo mv /home/ubuntu/scope /usr/bin/scope
-sudo echo {\"cluster-store\":\"consul://127.0.0.1:8500\"} > /home/ubuntu/daemon.json
+sudo echo {\"cluster-store\":\"consul://127.0.0.1:8500\"} >/home/ubuntu/daemon.json
 sudo mkdir -p /etc/docker
 sudo mv /home/ubuntu/daemon.json /etc/docker/daemon.json
 
@@ -81,8 +84,7 @@ sleep 30
 
 # Create Docker Networks
 for network in sockshop; do
-  if [ $(docker network ls | grep $network | wc -l) -eq 0 ]
-  then
+  if [ $(docker network ls | grep $network | wc -l) -eq 0 ]; then
     docker network create -d weave $network
   else
     echo docker network $network already created
@@ -94,5 +96,5 @@ sudo cp /ops/shared/scripts/setup_vault.sh /home/ubuntu/setup_vault.sh
 sudo cp /ops/shared/config/ssh_policy.hcl /home/ubuntu/ssh_policy.hcl
 sudo cp /ops/shared/jobs/sockshop.nomad /home/ubuntu/sockshop.nomad
 sudo chown -R $HOME_DIR:$HOME_DIR /home/$HOME_DIR/
-sudo chmod  666 /home/ubuntu/*
+sudo chmod 666 /home/ubuntu/*
 sudo chmod +x /home/ubuntu/setup_vault.sh

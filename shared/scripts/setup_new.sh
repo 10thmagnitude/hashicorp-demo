@@ -53,6 +53,9 @@ curl -L $VAULTDOWNLOAD >vault.zip
 sudo unzip vault.zip -d /usr/local/bin
 sudo chmod 0755 /usr/local/bin/vault
 sudo chown root:root /usr/local/bin/vault
+vault -autocomplete-install
+complete -C /usr/local/bin/vault vault
+sudo setcap cap_ipc_lock=+ep /usr/local/bin/vault
 
 ## Configure Vault
 sudo mkdir -p $VAULTCONFIGDIR
