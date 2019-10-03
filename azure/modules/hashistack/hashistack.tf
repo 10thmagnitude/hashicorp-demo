@@ -7,6 +7,14 @@ resource "azurerm_resource_group" "resource_group" {
   }
 }
 
+resource "random_string" "password" {
+  length      = 12
+  min_numeric = 1
+  min_upper   = 1
+  min_lower   = 1
+  special     = false
+}
+
 resource "azurerm_virtual_network" "terraform_network" {
   name                = "${var.name_prefix}vnet"
   address_space       = ["10.0.0.0/16"]
@@ -95,11 +103,13 @@ resource "azurerm_network_interface" "jump_box_nic" {
 }
 
 resource "azurerm_virtual_machine" "jump_box" {
-  name                  = "${var.name_prefix}_jump_box"
-  location              = azurerm_resource_group.resource_group.location
-  resource_group_name   = azurerm_resource_group.resource_group.name
-  network_interface_ids = [azurerm_network_interface.jump_box_nic.id]
-  vm_size               = var.vm_size
+  name                             = "${var.name_prefix}_jump_box"
+  location                         = azurerm_resource_group.resource_group.location
+  resource_group_name              = azurerm_resource_group.resource_group.name
+  network_interface_ids            = [azurerm_network_interface.jump_box_nic.id]
+  vm_size                          = var.vm_size
+  delete_os_disk_on_termination    = true
+  delete_data_disks_on_termination = true
 
   storage_image_reference {
     id = var.image_id
@@ -116,7 +126,7 @@ resource "azurerm_virtual_machine" "jump_box" {
   os_profile {
     computer_name  = "${var.name_prefix}-jump-box-vm"
     admin_username = "tonystark"
-    admin_password = "Password1234!"
+    admin_password = random_string.password.result
   }
 
   os_profile_linux_config {
@@ -129,12 +139,14 @@ resource "azurerm_virtual_machine" "jump_box" {
 }
 
 resource "azurerm_virtual_machine" "client_vm" {
-  name                  = "${var.name_prefix}_client-${count.index}"
-  count                 = var.vm_count
-  location              = azurerm_resource_group.resource_group.location
-  resource_group_name   = azurerm_resource_group.resource_group.name
-  network_interface_ids = [azurerm_network_interface.client_nic[count.index].id]
-  vm_size               = var.vm_size
+  name                             = "${var.name_prefix}_client-${count.index}"
+  count                            = var.vm_count
+  location                         = azurerm_resource_group.resource_group.location
+  resource_group_name              = azurerm_resource_group.resource_group.name
+  network_interface_ids            = [azurerm_network_interface.client_nic[count.index].id]
+  vm_size                          = var.vm_size
+  delete_os_disk_on_termination    = true
+  delete_data_disks_on_termination = true
 
   storage_image_reference {
     id = var.image_id
@@ -151,7 +163,7 @@ resource "azurerm_virtual_machine" "client_vm" {
   os_profile {
     computer_name  = "${var.name_prefix}-client-vm-${count.index}"
     admin_username = "brucebanner"
-    admin_password = "Password1234!"
+    admin_password = random_string.password.result
   }
 
   os_profile_linux_config {
@@ -165,15 +177,4 @@ resource "azurerm_virtual_machine" "client_vm" {
 
 }
 
-output "jump_box_private_ip" {
-  value = [azurerm_network_interface.jump_box_nic.private_ip_address]
-}
-
-output "client_private_ips" {
-  value = [azurerm_network_interface.client_nic.*.private_ip_addresses]
-}
-
-output "jump_box_public_ip" {
-  value = [azurerm_public_ip.myterraformpublicip.ip_address]
-}
 
