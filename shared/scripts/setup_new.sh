@@ -6,17 +6,17 @@ cd /ops
 
 CONFIGDIR=/ops/shared/config
 
-CONSULVERSION=0.9.2
+CONSULVERSION=1.3.1
 CONSULDOWNLOAD=https://releases.hashicorp.com/consul/${CONSULVERSION}/consul_${CONSULVERSION}_linux_amd64.zip
 CONSULCONFIGDIR=/etc/consul.d
 CONSULDIR=/opt/consul
 
-VAULTVERSION=0.8.1
+VAULTVERSION=1.2.3
 VAULTDOWNLOAD=https://releases.hashicorp.com/vault/${VAULTVERSION}/vault_${VAULTVERSION}_linux_amd64.zip
 VAULTCONFIGDIR=/etc/vault.d
 VAULTDIR=/opt/vault
 
-NOMADVERSION=0.6.0
+NOMADVERSION=0.9.5
 NOMADDOWNLOAD=https://releases.hashicorp.com/nomad/${NOMADVERSION}/nomad_${NOMADVERSION}_linux_amd64.zip
 NOMADCONFIGDIR=/etc/nomad.d
 NOMADDIR=/opt/nomad
@@ -26,7 +26,7 @@ sudo apt-get install -y software-properties-common
 sudo apt-get update
 sudo apt-get install -y unzip redis-tools jq
 sudo apt-get install -y unzip tree redis-tools jq
-sudo apt-get install -y upstart-sysv
+sudo apt-get install -y systemd-sysv
 sudo update-initramfs -u
 
 # Disable the firewall
@@ -75,10 +75,11 @@ sudo mkdir -p $NOMADDIR
 sudo chmod 755 $NOMADDIR
 
 # Docker
-echo deb https://apt.dockerproject.org/repo ubuntu-$(lsb_release -c | awk '{print $2}') main | sudo tee /etc/apt/sources.list.d/docker.list
-sudo apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
+sudo apt install -y apt-transport-https ca-certificates curl software-properties-common
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
 sudo apt-get update
-sudo apt-get install -y docker-engine
+sudo apt-get install -y docker-ce
 #sudo usermod -a -G docker ubuntu
 sudo sysctl -w vm.max_map_count=262144
 echo "Final Line of Code"

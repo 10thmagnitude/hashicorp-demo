@@ -9,10 +9,11 @@ data
 **/.terraform/*
 
 # .tfstate files
-*/**.tfstate
-*/**.tfstate.*
+**/**.tfstate
+**/**.tfstate.*
 
 # .tfvars files
+**/terraform.tfvars
 */**backend.tfvars
 */**backend.tfvars*
 */**secrets.tfvars

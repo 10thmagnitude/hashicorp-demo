@@ -17,7 +17,43 @@
       "artifact_id": "/subscriptions/aff2c340-2ecc-404c-8fc1-d86773973e78/resourceGroups/plaz-witcher-dev-rg/providers/Microsoft.Compute/images/MyUbuntuImage",
       "packer_run_uuid": "e7a6abb0-b289-e4b2-d17e-9fc51478ce05",
       "custom_data": null
+    },
+    {
+      "name": "azure-arm",
+      "builder_type": "azure-arm",
+      "build_time": 1570035762,
+      "files": null,
+      "artifact_id": "/subscriptions/3d22ce1b-11c5-4f79-b8d5-3cf8d4c08c33/resourceGroups/images/providers/Microsoft.Compute/images/UbuntuImage-2019-10-02T16-48-26Z",
+      "packer_run_uuid": "9904b917-2751-9ee6-d5af-e9f86c27e0d1",
+      "custom_data": null
+    },
+    {
+      "name": "azure-arm",
+      "builder_type": "azure-arm",
+      "build_time": 1570037544,
+      "files": null,
+      "artifact_id": "/subscriptions/3d22ce1b-11c5-4f79-b8d5-3cf8d4c08c33/resourceGroups/images/providers/Microsoft.Compute/images/UbuntuImage-2019-10-02T17-19-18Z",
+      "packer_run_uuid": "368b864b-f503-bce2-4a98-054cdf622ea3",
+      "custom_data": null
+    },
+    {
+      "name": "azure-arm",
+      "builder_type": "azure-arm",
+      "build_time": 1570051375,
+      "files": null,
+      "artifact_id": "/subscriptions/3d22ce1b-11c5-4f79-b8d5-3cf8d4c08c33/resourceGroups/images/providers/Microsoft.Compute/images/UbuntuImage-2019-10-02T21-09-18Z",
+      "packer_run_uuid": "9100792a-3695-eb5a-7596-3e89f84211dd",
+      "custom_data": null
+    },
+    {
+      "name": "azure-arm",
+      "builder_type": "azure-arm",
+      "build_time": 1570118179,
+      "files": null,
+      "artifact_id": "/subscriptions/3d22ce1b-11c5-4f79-b8d5-3cf8d4c08c33/resourceGroups/images/providers/Microsoft.Compute/images/UbuntuImage-2019-10-03T15-44-52Z",
+      "packer_run_uuid": "4e2eb33e-e1ff-750f-7250-64cd79f3a129",
+      "custom_data": null
     }
   ],
-  "last_run_uuid": "e7a6abb0-b289-e4b2-d17e-9fc51478ce05"
+  "last_run_uuid": "4e2eb33e-e1ff-750f-7250-64cd79f3a129"
 }

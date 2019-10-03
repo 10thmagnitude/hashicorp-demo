@@ -1,4 +1,4 @@
-# Build an Amazon machine image with Packer
+# Build an Azure machine image with Packer
 
 [Packer](https://www.packer.io/intro/index.html) is HashiCorp's open source tool 
 for creating identical machine images for multiple platforms from a single 
@@ -17,8 +17,10 @@ included `Vagrantfile` to bootstrap a staging environment, you will need to
 Set environment variables for your AWS credentials if you haven't already:
 
 ```bash
-$ export AWS_ACCESS_KEY_ID=[ACCESS_KEY_ID]
-$ export AWS_SECRET_ACCESS_KEY=[SECRET_ACCESS_KEY]
+$ export ARM_CLIENT_ID=[]
+$ export ARM_CLIENT_SECRET=[]
+$ export ARM_SUBSCRIPTION_ID=[]
+$ export IMAGE_RESOURCE_GROUP=[]
 ```
 
 After you make your modifications to `packer.json`, execute the following 
