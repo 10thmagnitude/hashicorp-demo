@@ -13,5 +13,6 @@ module "hashistack" {
   image_id            = var.image_id
   resource_group_name = var.resource_group_name
   name_prefix         = "Avengers"
+  client_secret       = var.client_secret
 }
 

@@ -1,19 +1,4 @@
-resource "azurerm_resource_group" "resource_group" {
-  name     = var.resource_group_name
-  location = var.location
 
-  tags = {
-    environment = "Terraform Demo"
-  }
-}
-
-resource "random_string" "password" {
-  length      = 12
-  min_numeric = 1
-  min_upper   = 1
-  min_lower   = 1
-  special     = false
-}
 
 resource "azurerm_virtual_network" "terraform_network" {
   name                = "${var.name_prefix}vnet"
@@ -135,6 +120,17 @@ resource "azurerm_virtual_machine" "jump_box" {
 
   tags = {
     environment = "Terraform Demo"
+  }
+}
+
+data "template_file" "cloud_config" {
+  template = "${file("${path.module}/templates/cloud-config.yml.tpl")}"
+
+  vars = {
+    tenant_id       = data.azurerm_client_config.current.tenant_id
+    subscription_id = data.azurerm_client_config.current.subscription_id
+    client_id       = data.azurerm_client_config.current.client_id
+    client_secret   = var.client_secret
   }
 }
 

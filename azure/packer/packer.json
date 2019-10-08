@@ -3,6 +3,7 @@
     "client_id": "{{env `ARM_CLIENT_ID`}}",
     "client_secret": "{{env `ARM_CLIENT_SECRET`}}",
     "subscription_id": "{{env `ARM_SUBSCRIPTION_ID`}}",
+    "tenant_id": "{{env `ARM_TENANT_ID`}}",
     "arm_location": "{{env `ARM_LOCATION`}}",
     "image_resource_group": "{{env `IMAGE_RESOURCE_GROUP`}}"
   },
@@ -38,17 +39,15 @@
     },
     {
       "type": "shell",
-      "script": "../../shared/scripts/setup_new.sh"
-    },
-    {
-      "type": "shell",
+      "inline_shebang": "/bin/bash -e",
       "inline": [
-        "sudo mkdir /home/ubuntu",
-        "sudo chmod 777 /home/ubuntu",
-        "sudo curl -L https://git.io/weave > /home/ubuntu/weave",
-        "sudo chmod +x /home/ubuntu/weave",
-        "sudo curl -L https://git.io/scope > /home/ubuntu/scope",
-        "sudo chmod +x /home/ubuntu/scope"
+        "sudo bash /ops/shared/scripts/packer_setup.sh \"{{user `tenant_id`}}\" \"{{user `subscription_id`}}\" \"{{user `client_id`}}\" \"{{user `client_secret`}}\"",
+        "sudo mkdir /home/ssdemo",
+        "sudo chmod 777 /home/ssdemo",
+        "sudo curl -L https://git.io/weave > /home/ssdemo/weave",
+        "sudo chmod +x /home/ssdemo/weave",
+        "sudo curl -L https://git.io/scope > /home/ssdemo/scope",
+        "sudo chmod +x /home/ssdemo/scope"
       ]
     },
     {
