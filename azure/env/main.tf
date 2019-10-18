@@ -15,5 +15,6 @@ module "hashistack" {
   resource_group_name = var.resource_group_name
   name_prefix         = "Avengers"
   tenant_id           = var.tenant_id   
+  client_secret       = var.client_secret
 }
 

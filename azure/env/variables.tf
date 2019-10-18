@@ -1,3 +1,7 @@
+variable "client_secret" {
+
+}
+
 variable "resource_group_name" {
   default = "sock_shop_demo"
 }

@@ -4,9 +4,14 @@ set -e
 
 cd /ops
 
+TENANT_ID=$1
+SUBSCRIPTION_ID=$2
+CLIENT_ID=$3
+CLIENT_SECRET=$4
+
 CONFIGDIR=/ops/shared/config
 
-CONSULVERSION=1.3.1
+CONSULVERSION=1.6.1
 CONSULDOWNLOAD=https://releases.hashicorp.com/consul/${CONSULVERSION}/consul_${CONSULVERSION}_linux_amd64.zip
 CONSULCONFIGDIR=/etc/consul.d
 CONSULDIR=/opt/consul
@@ -21,7 +26,7 @@ NOMADDOWNLOAD=https://releases.hashicorp.com/nomad/${NOMADVERSION}/nomad_${NOMAD
 NOMADCONFIGDIR=/etc/nomad.d
 NOMADDIR=/opt/nomad
 
-# Dependencies
+echo "Download Dependencies"
 sudo apt-get install -y software-properties-common
 sudo apt-get update
 sudo apt-get install -y unzip redis-tools jq
@@ -29,18 +34,25 @@ sudo apt-get install -y unzip tree redis-tools jq
 sudo apt-get install -y systemd-sysv
 sudo update-initramfs -u
 
-# Disable the firewall
+echo "Disable the firewall"
 sudo ufw disable
 
-# Download Consul
+echo "Download Consul"
 curl -L $CONSULDOWNLOAD >consul.zip
 
-## Install Consul
+echo "Install Consul"
 sudo unzip consul.zip -d /usr/local/bin
 sudo chmod 0755 /usr/local/bin/consul
 sudo chown root:root /usr/local/bin/consul
+consul -autocomplete-install
+complete -C /usr/local/bin/consul consul
 
-## Configure Consul
+echo "Configure Consul"
+
+sed -i "s/TENANT_ID/$TENANT_ID/g" $CONFIGDIR/consul.hcl
+sed -i "s/SUBSCRIPTION_ID/$SUBSCRIPTION_ID/g" $CONFIGDIR/consul.hcl
+sed -i "s/CLIENT_ID/$CLIENT_ID/g" $CONFIGDIR/consul.hcl
+sed -i "s/CLIENT_SECRET/$CLIENT_SECRET/g" $CONFIGDIR/consul.hcl
 sudo mkdir -p $CONSULCONFIGDIR
 sudo chmod 755 $CONSULCONFIGDIR
 sudo mkdir -p $CONSULDIR

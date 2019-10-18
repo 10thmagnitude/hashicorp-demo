@@ -6,32 +6,38 @@ CONFIGDIR=/ops/shared/config
 
 CONSULCONFIGDIR=/etc/consul.d
 NOMADCONFIGDIR=/etc/nomad.d
-HOME_DIR=ubuntu
+HOME_DIR=ssdemo
 
 # Wait for network
 sleep 15
 
 IP_ADDRESS=$(curl http://instance-data/latest/meta-data/local-ipv4)
-DOCKER_BRIDGE_IP_ADDRESS=(`ifconfig docker0 2>/dev/null|awk '/inet addr:/ {print $2}'|sed 's/addr://'`)
+DOCKER_BRIDGE_IP_ADDRESS=($(ifconfig docker0 2>/dev/null | awk '/inet addr:/ {print $2}' | sed 's/addr://'))
 REGION=$1
 CLUSTER_TAG_VALUE=$2
 SERVER_IP=$3
 
 # Consul
-sed -i "s/IP_ADDRESS/$IP_ADDRESS/g" $CONFIGDIR/consul_client.json
-sed -i "s/REGION/$REGION/g" $CONFIGDIR/consul_client.json
-sed -i "s/CLUSTER_TAG_VALUE/$CLUSTER_TAG_VALUE/g" $CONFIGDIR/consul_client.json
-sudo cp $CONFIGDIR/consul_client.json $CONSULCONFIGDIR/consul.json
-sudo cp $CONFIGDIR/consul_upstart.conf /etc/init/consul.conf
+# Consul
+id -u consul &>/dev/null || sudo useradd --system --home /etc/consul.d --shell /bin/false consul
+sudo chown --recursive consul:consul /opt/consul
+sudo cp $CONFIGDIR/consul.service /etc/systemd/system/consul.service
+sudo mkdir --parents /etc/consul.d
+sudo cp $CONFIGDIR/consul.hcl $CONSULCONFIGDIR
+sed -i "s/CONSUL_ENCRYPT_KEY/$CONSUL_ENCRYPT_KEY/g" $CONSULCONFIGDIR/consul.hcl
+sudo chown --recursive consul:consul $CONSULCONFIGDIR
+sudo chmod 640 $CONSULCONFIGDIR/consul.hcl
 
-sudo service consul start
+sudo systemctl enable consul
+sudo systemctl start consul
+sudo systemctl status consul
 sleep 10
 
 # Nomad
-sed -i "s/IP_ADDRESS/$IP_ADDRESS/g" $CONFIGDIR/nomad_client.hcl
-sed -i "s/SERVER_IP/$SERVER_IP/g" $CONFIGDIR/nomad_client.hcl
 sudo cp $CONFIGDIR/nomad_client.hcl $NOMADCONFIGDIR/nomad.hcl
 sudo cp $CONFIGDIR/nomad_upstart.conf /etc/init/nomad.conf
+sudo sed -i "s/IP_ADDRESS/$IP_ADDRESS/g" $NOMADCONFIGDIR/nomad_client.hcl
+sudo sed -i "s/SERVER_IP/$SERVER_IP/g" $NOMADCONFIGDIR/nomad_client.hcl
 
 sudo service nomad start
 sleep 10
@@ -54,11 +60,11 @@ echo "export NOMAD_ADDR=http://$IP_ADDRESS:4646" | sudo tee --append /home/$HOME
 
 # Move weave and scope to /usr/bin
 # and daemon.json to /etc/docker
-sudo mv /home/ubuntu/weave /usr/bin/weave
-sudo mv /home/ubuntu/scope /usr/bin/scope
-sudo echo {\"cluster-store\":\"consul://127.0.0.1:8500\"} > /home/ubuntu/daemon.json
+sudo mv /home/ssdemo/weave /usr/bin/weave
+sudo mv /home/ssdemo/scope /usr/bin/scope
+sudo echo {\"cluster-store\":\"consul://127.0.0.1:8500\"} >/home/ssdemo/daemon.json
 sudo mkdir -p /etc/docker
-sudo mv /home/ubuntu/daemon.json /etc/docker/daemon.json
+sudo mv /home/ssdemo/daemon.json /etc/docker/daemon.json
 
 # Start Docker, Weave Net, and Weave Scope
 sudo service docker restart
