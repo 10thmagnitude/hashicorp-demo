@@ -1,9 +1,17 @@
-variable "vm_count" {
-  default = 1
+variable "tenant_id" {
+  default = "empty"
+}
+
+variable "server_count" {
+  default = 3
+}
+
+variable "client_count" {
+  default = 4
 }
 
 variable "location" {
-  default = "eastus"
+  default = "westus"
 }
 
 variable "vm_size" {
@@ -11,7 +19,7 @@ variable "vm_size" {
 }
 
 variable "resource_group_name" {
-  default = "myResourceGroup"
+  default = "sock_shop_app_rg"
 }
 
 variable "image_id" {

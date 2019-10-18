@@ -7,11 +7,13 @@ provider "azurerm" {
 module "hashistack" {
   source = "../modules/hashistack"
 
-  vm_count            = var.server_count
+  server_count        = var.server_count
+  client_count        = var.client_count
   location            = var.location
   vm_size             = var.vm_size
   image_id            = var.image_id
   resource_group_name = var.resource_group_name
   name_prefix         = "Avengers"
+  tenant_id           = var.tenant_id   
 }
 

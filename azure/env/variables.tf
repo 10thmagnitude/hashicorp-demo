@@ -8,7 +8,12 @@ variable "location" {
 
 variable "server_count" {
   description = "how many servers to deploy with the packer image"
-  default     = 3
+  default     = 1
+}
+
+variable "client_count" {
+  description = "The number of client servers to deploy with the packer imaage."
+  default = 1
 }
 
 variable "vm_size" {
@@ -16,5 +21,8 @@ variable "vm_size" {
 }
 
 variable "image_id" {
+  default = "/subscriptions/aff2c340-2ecc-404c-8fc1-d86773973e78/resourceGroups/plaz-witcher-dev-rg/providers/Microsoft.Compute/images/UbuntuImage-2019-10-04T21-14-03Z"
 }
+
+variable "tenant_id" {}
 
