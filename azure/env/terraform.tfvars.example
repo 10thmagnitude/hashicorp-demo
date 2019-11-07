@@ -1,2 +1,3 @@
-location = "[REGION]"
-image_id = "[IMAGE_ID]"
+location      = "REGION"
+image_id      = "IMAGE_ID"
+consul_keygen = "CONSUL_KEYGEN"
