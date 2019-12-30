@@ -27,5 +27,8 @@ variable "vm_size" {
 }
 
 variable "image_id" {
+  default = "/subscriptions/aff2c340-2ecc-404c-8fc1-d86773973e78/resourceGroups/plaz-witcher-dev-rg/providers/Microsoft.Compute/images/UbuntuImage-2019-10-04T21-14-03Z"
 }
+
+variable "tenant_id" {}
 

@@ -23,6 +23,18 @@ data "template_file" "cloud_config" {
   }
 }
 
+  tags = {
+    environment = "Sock Shop Demo"
+  }
+}
+
+resource "random_string" "password" {
+  length      = 12
+  min_numeric = 1
+  min_upper   = 1
+  min_lower   = 1
+  special     = false
+}
 
 resource "azurerm_virtual_network" "terraform_network" {
   name                = "${random_pet.label.id}_vnet"
@@ -31,7 +43,7 @@ resource "azurerm_virtual_network" "terraform_network" {
   resource_group_name = azurerm_resource_group.resource_group.name
 
   tags = {
-    environment = "Terraform Demo"
+    environment = "Sock Shop Demo"
   }
 }
 
@@ -60,7 +72,7 @@ resource "azurerm_network_security_group" "myterraformnsg" {
   }
 
   tags = {
-    environment = "Terraform Demo"
+    environment = "Sock Shop Demo"
   }
 }
 
@@ -71,7 +83,26 @@ resource "azurerm_public_ip" "myterraformpublicip" {
   allocation_method   = "Dynamic"
 
   tags = {
-    environment = "Terraform Demo"
+    environment = "Sock Shop Demo"
+  }
+}
+
+resource "azurerm_network_interface" "server_nic" {
+  name                      = "${var.name_prefix}_server_NIC-${count.index}"
+  count                     = var.server_count
+  location                  = azurerm_resource_group.resource_group.location
+  resource_group_name       = azurerm_resource_group.resource_group.name
+  network_security_group_id = azurerm_network_security_group.myterraformnsg.id
+
+  ip_configuration {
+    name                          = "${var.name_prefix}_server_nic_configuration-${count.index}"
+    subnet_id                     = azurerm_subnet.myterraformsubnet.id
+    private_ip_address_allocation = "Dynamic"
+  }
+
+  tags = {
+    environment = "Sock Shop Demo"
+    consul = "server"
   }
 }
 
@@ -113,7 +144,7 @@ resource "azurerm_network_interface" "client_nic" {
   }
 
   tags = {
-    environment = "Terraform Demo"
+    environment = "Sock Shop Demo"
   }
 }
 
@@ -136,6 +167,17 @@ resource "azurerm_network_interface" "server_nic" {
     consul      = "server"
   }
 }
+
+# data "template_file" "user_data_client" {
+#   template = "${file("${path.root}/user-data-client.sh")}"
+
+#   vars {
+#     region            = "${var.region}"
+#     cluster_tag_value = "${var.cluster_tag_value}"
+#     server_ip = "${aws_instance.primary.0.private_ip}"
+#   }
+# }
+
 
 resource "azurerm_virtual_machine" "jump_box" {
   name                             = "${random_pet.label.id}_jump_box"
@@ -172,7 +214,7 @@ resource "azurerm_virtual_machine" "jump_box" {
   }
 
   tags = {
-    environment = "Terraform Demo"
+    environment = "Sock Shop Demo"
   }
 }
 
@@ -213,7 +255,7 @@ resource "azurerm_virtual_machine" "client_vm" {
   }
 
   tags = {
-    environment = "Terraform Demo"
+    environment = "Sock Shop Demo"
     id          = "client_${count.index}"
   }
 
