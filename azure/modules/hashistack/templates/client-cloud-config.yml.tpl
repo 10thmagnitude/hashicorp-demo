@@ -21,12 +21,6 @@ write_files:
       performance {
         raft_multiplier = ${server_count}
       }
-  - path: /etc/consul.d/server.hcl
-    permissions: 0640
-    content: |
-      server           = true
-      bootstrap_expect = ${server_count}
-      ui               = true
   - path: /etc/systemd/system/consul.service
     content: |
       [Unit]
@@ -47,84 +41,21 @@ write_files:
 
       [Install]
       WantedBy=multi-user.target
-  - path: /etc/vault.d/vault.hcl
-    permissions: 0640
-    content: |
-      backend "consul" {
-        path = "vault/"
-        address = "127.0.0.1:8500"
-        cluster_addr = "https://IP_ADDRESS:8201"
-        redirect_addr = "http://IP_ADDRESS:8200"
-      }
-
-      listener "tcp" {
-        address = "127.0.0.1:8200"
-        tls_disable = 1
-      }
-
-      listener "tcp" {
-        address = "IP_ADDRESS:8200"
-        cluster_address = "IP_ADDRESS:8201"
-        tls_disable = 1
-      }
-
-      seal "azurekeyvault" {
-        tenant_id = "${tenant_id}"
-        client_id = "${client_id}"
-        client_secret = "${client_secret}"
-        vault_name = "${key_vault_name}"
-        key_name = "${key_vault_key_name}"
-      }
-  - path: /etc/systemd/system/vault.service
-    content: |
-      [Unit]
-      Description="HashiCorp Vault - A tool for managing secrets"
-      Documentation=https://www.vaultproject.io/docs/
-      Requires=network-online.target
-      After=network-online.target
-      ConditionFileNotEmpty=/etc/vault.d/vault.hcl
-      StartLimitIntervalSec=60
-      StartLimitBurst=3
-
-      [Service]
-      User=vault
-      Group=vault
-      ProtectSystem=full
-      ProtectHome=read-only
-      PrivateTmp=yes
-      PrivateDevices=yes
-      SecureBits=keep-caps
-      AmbientCapabilities=CAP_IPC_LOCK
-      Capabilities=CAP_IPC_LOCK+ep
-      CapabilityBoundingSet=CAP_SYSLOG CAP_IPC_LOCK
-      NoNewPrivileges=yes
-      ExecStart=/usr/local/bin/vault server -config=/etc/vault.d/vault.hcl
-      ExecReload=/bin/kill --signal HUP $MAINPID
-      KillMode=process
-      KillSignal=SIGINT
-      Restart=on-failure
-      RestartSec=5
-      TimeoutStopSec=30
-      StartLimitInterval=60
-      StartLimitBurst=3
-      LimitNOFILE=65536
-      LimitMEMLOCK=infinity
-
-      [Install]
-      WantedBy=multi-user.target
   - path: /etc/nomad.d/nomad.hcl
     permissions: 0640
     content: |
       data_dir = "/opt/nomad/data"
       bind_addr = "0.0.0.0"
-
-      # Enable the server
-      server {
-        enabled = true
-        bootstrap_expect = ${server_count}
-      }
-
       name = "nomad@IP_ADDRESS"
+
+      # Enable the client
+      client {
+        enabled = true
+        options = {
+          driver.raw_exec.enable = "1"
+          docker.cleanup.image = false
+        }
+      }
 
       consul {
         address = "127.0.0.1:8500"
@@ -132,10 +63,7 @@ write_files:
 
       vault {
         enabled = true
-        address = "http://IP_ADDRESS:8200"
-        task_token_ttl = "1h"
-        create_from_role = "nomad-cluster"
-        token = "TOKEN_FOR_VAULT"
+        address = "http://${vault_server_ip}:8200"
       }
   - path: /etc/systemd/system/nomad.service
     content: |
@@ -162,10 +90,10 @@ write_files:
   - path: /home/ssdemo/.profile
     owner: ssdemo:ssdemo
     content: |
-      export VAULT_ADDR=http://IP_ADDRESS:8200
+      export VAULT_ADDR=http://${vault_server_ip}:8200
+      export NOMAD_ADDR=http://IP_ADDRESS:4646
 runcmd:
   - ifconfig eth0 | awk '/inet / {print $2}' > /home/ssdemo/IP_ADDRESS
-  - az login --service-principal -u ${client_id} -p ${client_secret} -t ${tenant_id}
   - az keyvault secret show --vault-name ${key_vault_name} -n ${private_key_name} | jq -r '.value' > /home/ssdemo/.ssh/id_rsa
   - az keyvault secret show --vault-name ${key_vault_name} -n ${public_key_name} | jq -r '.value' > /home/ssdemo/.ssh/id_rsa.pub
   - [chown, "--recursive", "ssdemo:ssdemo", "/home/ssdemo/.ssh/"]
@@ -175,12 +103,9 @@ runcmd:
   - sed -i s/IP_ADDRESS/$(ifconfig eth0 | awk '/inet / {print $2}')/g /etc/consul.d/consul.hcl
   - [systemctl, enable, consul]
   - [systemctl, start, consul]
-  - sed -i s/IP_ADDRESS/$(ifconfig eth0 | awk '/inet / {print $2}')/g /etc/vault.d/vault.hcl
-  - [chown, "--recursive", "vault:vault", "/etc/vault.d"]
-  - setcap cap_ipc_lock=+ep /usr/local/bin/vault
-  - [systemctl, enable, vault]
-  - [systemctl, start, vault]
   - sed -i s/IP_ADDRESS/$(ifconfig eth0 | awk '/inet / {print $2}')/g /etc/nomad.d/nomad.hcl
+  - [systemctl, enable, nomad]
+  - [systemctl, start, nomad]
   - echo "127.0.0.1 $(hostname)" | sudo tee --append /etc/hosts
   - echo "nameserver $(ifconfig docker0 2>/dev/null | awk '/inet / {print $2}')" | sudo tee /etc/resolv.conf.new
   - cat /etc/resolv.conf | sudo tee --append /etc/resolv.conf.new
@@ -195,18 +120,10 @@ runcmd:
   - /usr/bin/weave launch --dns-domain="service.consul." --ipalloc-init consensus=2
   - sleep 30
   - /usr/bin/scope launch -weave.hostname scope.service.consul
-  - for network in sockshop; do if [ $(docker network ls | grep $network | wc -l) -eq 0 ]; then docker network create -d weave $network; else echo docker network $network already created; fi; done
-  - [cp, "/ops/shared/config/ssh_policy.hcl", "/home/ssdemo/ssh_policy.hcl"]
-  - [cp, "/ops/shared/jobs/sockshop.nomad", "/home/ssdemo/sockshop.nomad"]
-  - [cp, "/ops/shared/scripts/setup_vault.sh", "/home/ssdemo/setup_vault.sh"]
-  - sed -i s/VAULT_SERVER_IP/${vault_server_ip}/g /home/ssdemo/setup_vault.sh
+  - /usr/bin/weave connect $(ifconfig eth0 | awk '/inet / {print $2}')
+  - /usr/bin/weave expose
   - [chown, "--recursive", "ssdemo:ssdemo", "/home/ssdemo/"]
-  - [chmod, "go-w", "/home/ssdemo/"]
   - sed -i s/IP_ADDRESS/$(ifconfig eth0 | awk '/inet / {print $2}')/g /home/ssdemo/.profile
-  - sudo -u ssdemo /home/ssdemo/setup_vault.sh 
-  - [systemctl, enable, nomad]
-  - [systemctl, start, nomad]
-  - sleep 10
-  - nomad run /home/ssdemo/sockshop.nomad
+  - [chmod, "go-w", "/home/ssdemo/"]
   - touch /home/ssdemo/DONE
   - [chmod, "ssdemo:ssdemo", "/home/ssdemo/DONE"]

@@ -17,7 +17,7 @@
     "image_offer": "UbuntuServer",
     "image_sku": "18.04-LTS",
     "managed_image_resource_group_name": "{{user `image_resource_group`}}",
-    "managed_image_name": "UbuntuImage-{{isotime | clean_image_name}}",
+    "managed_image_name": "UbuntuImage-{{isotime | clean_resource_name}}",
     "azure_tags": {
       "dept": "engineering",
       "task": "image deployment"

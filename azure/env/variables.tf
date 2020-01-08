@@ -19,7 +19,7 @@ variable "client_count" {
 }
 variable "server_count" {
   description = "how many servers to deploy with the packer image"
-  default     = 1
+  default     = 2
 }
 
 variable "vm_size" {

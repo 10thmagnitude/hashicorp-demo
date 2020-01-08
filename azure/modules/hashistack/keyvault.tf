@@ -22,6 +22,12 @@ resource "azurerm_key_vault" "key_vault" {
       "wrapKey",
       "unwrapKey",
     ]
+
+    secret_permissions = [
+      "get",
+      "list",
+      "set",
+    ]
   }
 
 }
@@ -40,4 +46,16 @@ resource "azurerm_key_vault_key" "key_vault_key" {
     "verify",
     "wrapKey",
   ]
+}
+
+resource "azurerm_key_vault_secret" "private_ssh_key" {
+  name         = "private-ssh-key"
+  value        = tls_private_key.ssh_key.private_key_pem
+  key_vault_id = azurerm_key_vault.key_vault.id
+}
+
+resource "azurerm_key_vault_secret" "public_ssh_key" {
+  name         = "public-ssh-key"
+  value        = tls_private_key.ssh_key.public_key_openssh
+  key_vault_id = azurerm_key_vault.key_vault.id
 }

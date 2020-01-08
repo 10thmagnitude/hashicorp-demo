@@ -14,25 +14,24 @@ See the pre-requisites listed [here](../../README.md). If you did not use the
 included `Vagrantfile` to bootstrap a staging environment, you will need to 
 [install Packer](https://www.packer.io/intro/getting-started/install.html).
 
-Set environment variables for your AWS credentials if you haven't already:
+Set environment variables for your Azure credentials if you haven't already:
 
 ```bash
 $ export ARM_CLIENT_ID=[]
 $ export ARM_CLIENT_SECRET=[]
 $ export ARM_SUBSCRIPTION_ID=[]
+$ export ARM_TENANT_ID=[]
+$ export ARM_LOCATION=[]
 $ export IMAGE_RESOURCE_GROUP=[]
 ```
 
 After you make your modifications to `packer.json`, execute the following 
-command to build the AMI:
+command to build the image:
 
 ```bash
 $ packer build packer.json
 ```
 
-If the packer.json has the post processor configured to output manifest.json file.  Run the below command to get the artifact_id
-```bash
-$ cat manifest.json | jq -r .builds[0].artifact_id 
-```
+The `ManagedImageId` should output to the console. Or if the packer.json has the post processor configured to output manifest.json file, you can get the image ID from the manifest.
 
-Don't forget to copy the AMI ID to your [terraform.tfvars file](../env/us-east/terraform.tfvars).
+Don't forget to copy the `ManagedImageId` to your [terraform.tfvars file](../env/us-east/terraform.tfvars).

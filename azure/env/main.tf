@@ -1,7 +1,7 @@
 #main.tf inorder to deploy images using packer into Azure
 
 provider "azurerm" {
-  version = "=1.34.0"
+  version = "=1.39.0"
 }
 
 module "hashistack" {

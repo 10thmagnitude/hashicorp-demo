@@ -3,7 +3,7 @@ resource "azurerm_resource_group" "resource_group" {
   location = var.location
 
   tags = {
-    environment = "Terraform Demo"
+    environment = "Sock Shop Demo"
   }
 }
 
@@ -16,6 +16,11 @@ resource "random_string" "password" {
 }
 
 resource "random_pet" "label" {
+}
+
+resource "tls_private_key" "ssh_key" {
+  algorithm = "RSA"
+  rsa_bits  = 4096
 }
 
 data "azurerm_client_config" "current" {}
